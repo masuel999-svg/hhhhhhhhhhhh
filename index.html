@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>الهروب من جزيرة الكنز – Treasure Island Adventure</title>
+  <style>
+    :root {
+      --bg-stage-1: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #1e3a8a 100%);
+      --bg-stage-2: linear-gradient(135deg, #15803d 0%, #166534 55%, #064e3b 100%);
+      --bg-stage-3: linear-gradient(135deg, #0d9488 0%, #115e59 55%, #134e4a 100%);
+      --bg-stage-4: linear-gradient(135deg, #581c87 0%, #3b0764 55%, #1e1b4b 100%);
+      --bg-stage-5: linear-gradient(135deg, #b45309 0%, #92400e 50%, #78350f 100%);
+      --gold: #fbbf24;
+      --gold-dark: #d97706;
+      --cream: #fffbeb;
+      --wood: #78350f;
+      --wood-light: #92400e;
+      --card-bg: rgba(255, 255, 255, 0.96);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg-stage-1);
+      color: #1e293b;
+      transition: background 0.8s ease;
+      overflow-x: hidden;
+      padding-bottom: 30px;
+    }
+
+    body.stage-1 { background: var(--bg-stage-1); }
+    body.stage-2 { background: var(--bg-stage-2); }
+    body.stage-3 { background: var(--bg-stage-3); }
+    body.stage-4 { background: var(--bg-stage-4); }
+    body.stage-5 { background: var(--bg-stage-5); }
+
+    /* Decorative Floating Clouds / Bubbles */
+    .bg-decor {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      animation: floatUp 14s infinite ease-in-out;
+    }
+    @keyframes floatUp {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-25px) scale(1.06); }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 12px 16px;
+    }
+
+    /* 3D Cartoon Top Bar */
+    .top-bar {
+      background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+      border: 4px solid #d97706;
+      border-radius: 26px;
+      padding: 12px 18px;
+      box-shadow: 0 8px 0 #92400e, 0 14px 25px rgba(0,0,0,0.3);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .game-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border: 3px solid #78350f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      box-shadow: 0 4px 0 #78350f;
+    }
+
+    .brand-title h1 {
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: #78350f;
+      line-height: 1.2;
+    }
+
+    .brand-title p {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #b45309;
+    }
+
+    /* Progress Bar Section */
+    .progress-wrapper {
+      flex: 1;
+      min-width: 240px;
+      max-width: 420px;
+      background: #fff;
+      border: 3px solid #d97706;
+      border-radius: 20px;
+      padding: 8px 14px;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 900;
+      font-size: 0.9rem;
+      color: #78350f;
+      margin-bottom: 5px;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 18px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 2px solid #cbd5e1;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #f59e0b, #eab308, #22c55e);
+      border-radius: 999px;
+      transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: inset 0 2px 4px rgba(255,255,255,0.5);
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* 3D Buttons */
+    .btn-3d {
+      border: none;
+      border-radius: 16px;
+      padding: 10px 16px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .btn-3d:active {
+      transform: translateY(4px);
+    }
+
+    .btn-gold {
+      background: linear-gradient(180deg, #fde047 0%, #f59e0b 100%);
+      color: #451a03;
+      border: 2px solid #92400e;
+      box-shadow: 0 4px 0 #92400e;
+    }
+    .btn-gold:active { box-shadow: 0 0 0 #92400e; }
+
+    .btn-blue {
+      background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+      color: #ffffff;
+      border: 2px solid #075985;
+      box-shadow: 0 4px 0 #075985;
+    }
+    .btn-blue:active { box-shadow: 0 0 0 #075985; }
+
+    .btn-green {
+      background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%);
+      color: #ffffff;
+      border: 2px solid #14532d;
+      box-shadow: 0 4px 0 #14532d;
+    }
+    .btn-green:active { box-shadow: 0 0 0 #14532d; }
+
+    .btn-red {
+      background: linear-gradient(180deg, #f87171 0%, #dc2626 100%);
+      color: #ffffff;
+      border: 2px solid #7f1d1d;
+      box-shadow: 0 4px 0 #7f1d1d;
+    }
+    .btn-red:active { box-shadow: 0 0 0 #7f1d1d; }
+
+    /* Main Grid Layout */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 1.35fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    @media (max-width: 920px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Interactive Map Panel */
+    .map-card {
+      background: linear-gradient(180deg, #fef9c3 0%, #fde68a 100%);
+      border: 4px solid #92400e;
+      border-radius: 28px;
+      padding: 14px;
+      box-shadow: 0 8px 0 #78350f, 0 15px 30px rgba(0,0,0,0.3);
+    }
+
+    .map-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      color: #78350f;
+      font-weight: 900;
+      font-size: 1.05rem;
+    }
+
+    .island-svg-box {
+      width: 100%;
+      background: radial-gradient(circle, #38bdf8 0%, #0284c7 80%, #0369a1 100%);
+      border: 3px solid #92400e;
+      border-radius: 22px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 4px 12px rgba(0,0,0,0.25);
+    }
+
+    .stage-node {
+      cursor: default;
+      transition: transform 0.3s ease;
+    }
+    .stage-node.active-node {
+      animation: bounceNode 1.4s infinite ease-in-out;
+    }
+    @keyframes bounceNode {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    /* Stage Legend Pills */
+    .stages-list {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .stage-pill {
+      background: rgba(255,255,255,0.7);
+      border: 2px solid #d97706;
+      border-radius: 12px;
+      padding: 6px 4px;
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #78350f;
+      transition: all 0.3s ease;
+    }
+    .stage-pill.current {
+      background: #f59e0b;
+      color: #fff;
+      border-color: #78350f;
+      transform: scale(1.05);
+      box-shadow: 0 3px 0 #78350f;
+    }
+    .stage-pill.completed {
+      background: #22c55e;
+      color: #fff;
+      border-color: #14532d;
+    }
+
+    /* Adventure & Question Stage Card */
+    .play-card {
+      background: var(--card-bg);
+      border: 4px solid #f59e0b;
+      border-radius: 28px;
+      padding: 20px;
+      box-shadow: 0 8px 0 #b45309, 0 18px 35px rgba(0,0,0,0.35);
+      min-height: 460px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .stage-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      border: 2px solid #f59e0b;
+      border-radius: 20px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+    }
+
+    .stage-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .stage-emoji {
+      font-size: 2.2rem;
+      filter: drop-shadow(0 3px 3px rgba(0,0,0,0.2));
+    }
+    .stage-info h2 {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #78350f;
+    }
+    .stage-info p {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #92400e;
+    }
+
+    .question-box {
+      background: #f8fafc;
+      border: 3px dashed #94a3b8;
+      border-radius: 22px;
+      padding: 18px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .q-counter {
+      display: inline-block;
+      background: #0284c7;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+    .q-text {
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: #0f172a;
+      line-height: 1.5;
+    }
+
+    /* Options Grid (A, B, C, D) */
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    @media (max-width: 560px) {
+      .options-grid { grid-template-columns: 1fr; }
+    }
+
+    .opt-btn {
+      background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+      border: 3px solid #cbd5e1;
+      box-shadow: 0 5px 0 #94a3b8;
+      border-radius: 20px;
+      padding: 14px 16px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #1e293b;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-align: right;
+      transition: all 0.15s ease;
+    }
+    .opt-btn:hover:not(:disabled) {
+      border-color: #0284c7;
+      background: #e0f2fe;
+      transform: translateY(-2px);
+    }
+    .opt-btn:active:not(:disabled) {
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 #94a3b8;
+    }
+    .opt-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.65;
+    }
+
+    .opt-letter {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: #0284c7;
+      color: #fff;
+      font-weight: 900;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* Animations for Correct / Wrong */
+    .opt-correct {
+      background: linear-gradient(180deg, #86efac 0%, #22c55e 100%) !important;
+      border-color: #14532d !important;
+      box-shadow: 0 5px 0 #14532d !important;
+      color: #ffffff !important;
+      animation: popScale 0.45s ease;
+    }
+    .opt-correct .opt-letter {
+      background: #14532d;
+    }
+
+    .opt-wrong {
+      background: linear-gradient(180deg, #fca5a5 0%, #ef4444 100%) !important;
+      border-color: #7f1d1d !important;
+      box-shadow: 0 5px 0 #7f1d1d !important;
+      color: #ffffff !important;
+      animation: shakeAnim 0.45s ease;
+    }
+    .opt-wrong .opt-letter {
+      background: #7f1d1d;
+    }
+
+    @keyframes popScale {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+    @keyframes shakeAnim {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      50% { transform: translateX(8px); }
+      75% { transform: translateX(-6px); }
+    }
+
+    /* Feedback Banner */
+    .feedback-msg {
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-weight: 800;
+      font-size: 1rem;
+      text-align: center;
+      margin-top: 8px;
+      display: none;
+    }
+    .feedback-msg.show { display: block; animation: popScale 0.35s ease; }
+    .feedback-success {
+      background: #dcfce7;
+      border: 2px solid #22c55e;
+      color: #14532d;
+    }
+    .feedback-retry {
+      background: #fef3c7;
+      border: 2px solid #f59e0b;
+      color: #78350f;
+    }
+
+    /* Path Choice View (After Correct Answer) */
+    .paths-view {
+      display: none;
+      text-align: center;
+      animation: popScale 0.4s ease;
+    }
+    .paths-view.active { display: block; }
+
+    .paths-title {
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: #78350f;
+      margin-bottom: 6px;
+    }
+    .paths-subtitle {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 16px;
+    }
+
+    .paths-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+      gap: 14px;
+    }
+
+    .path-card {
+      background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+      border: 3px solid #d97706;
+      box-shadow: 0 6px 0 #92400e;
+      border-radius: 22px;
+      padding: 18px 12px;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .path-card:hover {
+      transform: translateY(-4px);
+      background: linear-gradient(180deg, #fef08a 0%, #fde047 100%);
+    }
+    .path-card:active {
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 #92400e;
+    }
+    .path-icon {
+      font-size: 2.8rem;
+    }
+    .path-name {
+      font-size: 1.05rem;
+      font-weight: 900;
+      color: #78350f;
+    }
+    .path-hint {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #92400e;
+    }
+
+    /* Event / Surprise Chest View */
+    .event-view {
+      display: none;
+      text-align: center;
+      background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
+      border: 3px solid #2563eb;
+      border-radius: 24px;
+      padding: 22px 18px;
+      animation: popScale 0.4s ease;
+    }
+    .event-view.active { display: block; }
+    .event-emoji {
+      font-size: 4rem;
+      margin-bottom: 10px;
+      display: inline-block;
+      animation: bounceNode 1.2s infinite;
+    }
+    .event-title {
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: #1e3a8a;
+      margin-bottom: 8px;
+    }
+    .event-desc {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1e40af;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+
+    /* MODALS (Teacher Panel & Victory Screen) */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      overflow-y: auto;
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #ffffff;
+      border: 4px solid #d97706;
+      border-radius: 28px;
+      width: 100%;
+      max-width: 780px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 22px;
+      box-shadow: 0 12px 0 #78350f, 0 25px 50px rgba(0,0,0,0.5);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+    .modal-header h2 {
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: #78350f;
+    }
+
+    .teacher-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    @media (max-width: 640px) {
+      .teacher-grid { grid-template-columns: 1fr; }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .form-group label {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #334155;
+    }
+    .form-control {
+      padding: 10px 12px;
+      border: 2px solid #cbd5e1;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #0f172a;
+      background: #f8fafc;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: #0284c7;
+      background: #fff;
+    }
+
+    .q-list-admin {
+      margin-top: 16px;
+      border-top: 2px solid #e2e8f0;
+      padding-top: 12px;
+      max-height: 260px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .q-item-row {
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .q-item-info {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+    .q-item-stage {
+      font-size: 0.75rem;
+      color: #0284c7;
+      font-weight: 800;
+    }
+
+    /* Victory Screen */
+    .victory-box {
+      background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+      border: 6px solid #f59e0b;
+      border-radius: 32px;
+      max-width: 560px;
+      width: 100%;
+      padding: 30px 22px;
+      text-align: center;
+      box-shadow: 0 12px 0 #92400e, 0 25px 60px rgba(0,0,0,0.6);
+      animation: popScale 0.5s ease;
+    }
+    .treasure-chest-anim {
+      font-size: 5rem;
+      display: inline-block;
+      animation: bounceNode 1s infinite;
+      margin-bottom: 10px;
+    }
+
+    /* Confetti Canvas */
+    #confettiCanvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 200;
+    }
+  </style>
+</head>
+<body class="stage-1">
+
+  <canvas id="confettiCanvas"></canvas>
+
+  <div class="bg-decor">
+    <div class="bubble" style="width:120px;height:120px;top:12%;right:8%;"></div>
+    <div class="bubble" style="width:180px;height:180px;bottom:10%;left:6%;animation-delay:3s;"></div>
+    <div class="bubble" style="width:90px;height:90px;top:55%;right:45%;animation-delay:6s;"></div>
+  </div>
+
+  <div class="container">
+    <!-- TOP BAR -->
+    <header class="top-bar">
+      <div class="game-brand">
+        <div class="brand-icon">🏴‍☠️</div>
+        <div class="brand-title">
+          <h1>الهروب من جزيرة الكنز</h1>
+          <p>Treasure Island Adventure</p>
+        </div>
+      </div>
+
+      <!-- SCORE & PROGRESS BAR -->
+      <div class="progress-wrapper">
+        <div class="progress-header">
+          <span>🪙 نقاط الهروب: <strong id="scoreText">0</strong> / <span id="goalText">100</span></span>
+          <span id="percentText">0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+
+      <!-- CONTROLS -->
+      <div class="top-actions">
+        <button class="btn-3d btn-blue" onclick="openTeacherModal()">
+          <span>⚙️</span>
+          <span>لوحة المعلم</span>
+        </button>
+        <button class="btn-3d btn-gold" onclick="resetGame()">
+          <span>🔄</span>
+          <span>إعادة اللعب</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT GRID -->
+    <main class="main-grid">
+      <!-- LEFT: INTERACTIVE ISLAND MAP -->
+      <section class="map-card">
+        <div class="map-title">
+          <span>🗺️ خريطة جزيرة الكنز التفاعلية</span>
+          <span id="stageStepBadge">المرحلة 1 من 5</span>
+        </div>
+
+        <div class="island-svg-box">
+          <svg viewBox="0 0 500 370" width="100%" height="100%">
+            <!-- Sea Waves -->
+            <path d="M 30 50 Q 50 40 70 50 T 110 50" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M 370 310 Q 390 300 410 310 T 450 310" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M 40 300 Q 60 290 80 300" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="3" stroke-linecap="round"/>
+
+            <!-- Island Sand Base -->
+            <path d="M 65 265 C 35 215 65 130 135 95 C 195 60 325 50 395 95 C 460 135 465 235 415 285 C 365 335 245 340 165 325 C 110 315 85 295 65 265 Z"
+                  fill="#fde68a" stroke="#d97706" stroke-width="6"/>
+            <!-- Island Green Interior -->
+            <path d="M 88 250 C 65 208 90 140 150 110 C 202 82 315 72 375 110 C 430 145 435 225 392 268 C 348 310 242 315 172 302 C 125 292 102 275 88 250 Z"
+                  fill="#4ade80" stroke="#16a34a" stroke-width="4"/>
+
+            <!-- Decorative Trees & Mountains -->
+            <polygon points="270,135 295,88 320,135" fill="#94a3b8" stroke="#475569" stroke-width="2"/>
+            <polygon points="295,88 286,105 304,105" fill="#ffffff"/>
+            <circle cx="155" cy="155" r="14" fill="#15803d"/>
+            <circle cx="170" cy="150" r="12" fill="#166534"/>
+            <circle cx="330" cy="230" r="14" fill="#15803d"/>
+
+            <!-- Dotted Adventure Path -->
+            <path d="M 95 275 Q 145 255 170 215 T 255 190 T 335 155 T 395 115"
+                  fill="none" stroke="#92400e" stroke-width="5" stroke-dasharray="10 8" stroke-linecap="round"/>
+
+            <!-- STAGE 1: Sunken Ship -->
+            <g id="node-0" class="stage-node active-node" transform="translate(95, 275)">
+              <circle r="24" fill="#0284c7" stroke="#ffffff" stroke-width="3"/>
+              <text y="7" text-anchor="middle" font-size="22">🚢</text>
+            </g>
+
+            <!-- STAGE 2: Mysterious Jungle -->
+            <g id="node-1" class="stage-node" transform="translate(170, 215)">
+              <circle r="24" fill="#16a34a" stroke="#ffffff" stroke-width="3"/>
+              <text y="7" text-anchor="middle" font-size="22">🌴</text>
+            </g>
+
+            <!-- STAGE 3: Crocodile Bridge -->
+            <g id="node-2" class="stage-node" transform="translate(255, 190)">
+              <circle r="24" fill="#0d9488" stroke="#ffffff" stroke-width="3"/>
+              <text y="7" text-anchor="middle" font-size="22">🐊</text>
+            </g>
+
+            <!-- STAGE 4: Cave of Secrets -->
+            <g id="node-3" class="stage-node" transform="translate(335, 155)">
+              <circle r="24" fill="#7e22ce" stroke="#ffffff" stroke-width="3"/>
+              <text y="7" text-anchor="middle" font-size="22">🦇</text>
+            </g>
+
+            <!-- STAGE 5: Treasure Castle -->
+            <g id="node-4" class="stage-node" transform="translate(395, 115)">
+              <circle r="26" fill="#f59e0b" stroke="#ffffff" stroke-width="3"/>
+              <text y="8" text-anchor="middle" font-size="24">🏰</text>
+            </g>
+
+            <!-- Explorer Avatar Marker -->
+            <g id="explorerMarker" transform="translate(95, 240)" style="transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);">
+              <circle r="16" fill="#fef08a" stroke="#92400e" stroke-width="2.5"/>
+              <text y="6" text-anchor="middle" font-size="18">🧭</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- 5 Stages Bottom Pills -->
+        <div class="stages-list" id="stagesPills">
+          <div class="stage-pill current" id="pill-0">1. السفينة</div>
+          <div class="stage-pill" id="pill-1">2. الغابة</div>
+          <div class="stage-pill" id="pill-2">3. التماسيح</div>
+          <div class="stage-pill" id="pill-3">4. الكهف</div>
+          <div class="stage-pill" id="pill-4">5. القلعة</div>
+        </div>
+      </section>
+
+      <!-- RIGHT: INTERACTIVE STAGE & QUESTION AREA -->
+      <section class="play-card">
+        <!-- Stage Header Banner -->
+        <div class="stage-banner">
+          <div class="stage-badge">
+            <div class="stage-emoji" id="stageEmoji">🚢</div>
+            <div class="stage-info">
+              <h2 id="stageTitle">المرحلة 1: السفينة الغارقة</h2>
+              <p id="stageStory">ابحث بين حطام السفينة القديمة عن أول مفتاح للخريطة!</p>
+            </div>
+          </div>
+          <div style="background:#fff;border:2px solid #d97706;border-radius:14px;padding:6px 12px;font-weight:900;color:#92400e;font-size:0.85rem;">
+            قيمة السؤال: +<span id="pointsPerQDisplay">10</span> نقاط
+          </div>
+        </div>
+
+        <!-- VIEW 1: QUESTION VIEW -->
+        <div id="questionView">
+          <div class="question-box">
+            <span class="q-counter" id="qNumberBadge">سؤال المغامرة #1</span>
+            <div class="q-text" id="questionText">جاري تحميل السؤال...</div>
+          </div>
+
+          <div class="options-grid" id="optionsGrid">
+            <!-- Buttons A, B, C, D injected by JS -->
+          </div>
+
+          <div class="feedback-msg" id="feedbackMsg"></div>
+        </div>
+
+        <!-- VIEW 2: CHOOSE YOUR PATH VIEW -->
+        <div id="pathsView" class="paths-view">
+          <div class="paths-title">🎉 إجابة رائعة! والآن.. أي طريق ستختار؟</div>
+          <div class="paths-subtitle">اختيارك سيحدد المفاجأة أو التحدي القادم في الجزيرة!</div>
+          <div class="paths-grid" id="pathsGrid">
+            <!-- 2 or 3 Path Cards injected by JS -->
+          </div>
+        </div>
+
+        <!-- VIEW 3: SURPRISE EVENT / CHEST VIEW -->
+        <div id="eventView" class="event-view">
+          <div class="event-emoji" id="eventEmoji">🎁</div>
+          <h3 class="event-title" id="eventTitle">صندوق مفاجآت!</h3>
+          <p class="event-desc" id="eventDesc">لقد عثرت على كنز صغير مخبأ تحت الرمال!</p>
+          <button class="btn-3d btn-green" style="font-size:1.1rem;padding:12px 26px;" onclick="continueAfterEvent()">
+            <span>متابعة المغامرة</span>
+            <span>⬅️</span>
+          </button>
+        </div>
+
+        <!-- Bottom Helpful Tip for Online Teacher -->
+        <div style="margin-top:14px;padding-top:10px;border-top:2px dashed #e2e8f0;display:flex;justify-content:space-between;align-items:center;font-size:0.8rem;color:#64748b;font-weight:700;">
+          <span>💡 يطرح المعلم السؤال شفهيًا ويختار الطالب الإجابة على الشاشة</span>
+          <button onclick="quickAddPoints(10)" style="background:#fef3c7;border:1px solid #f59e0b;color:#92400e;border-radius:8px;padding:3px 8px;font-weight:800;cursor:pointer;" title="مكافأة تشجيعية من المعلم">+10 مكافأة</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ================= TEACHER CONTROL PANEL MODAL ================= -->
+  <div class="modal-overlay" id="teacherModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>⚙️ لوحة تحكم المعلم – تخصيص الأسئلة والنقاط</h2>
+        <button class="btn-3d btn-red" style="padding:6px 12px;font-size:0.85rem;" onclick="closeTeacherModal()">إغلاق ✖</button>
+      </div>
+
+      <!-- Points Settings -->
+      <div class="teacher-grid" style="background:#fffbeb;padding:12px;border-radius:16px;border:2px solid #fde68a;">
+        <div class="form-group">
+          <label>🎯 عدد النقاط لكل إجابة صحيحة:</label>
+          <input type="number" id="inputPointsPerQ" class="form-control" min="5" max="50" step="5" value="10">
+        </div>
+        <div class="form-group">
+          <label>🏆 النقاط المطلوبة للوصول للكنز والهروب:</label>
+          <input type="number" id="inputGoalScore" class="form-control" min="30" max="300" step="10" value="100">
+        </div>
+      </div>
+
+      <!-- Add / Edit Question Form -->
+      <h3 style="font-size:1rem;font-weight:900;color:#0284c7;margin-bottom:10px;" id="formModeTitle">➕ إضافة سؤال جديد أو تعديل سؤال</h3>
+      <input type="hidden" id="editQuestionIndex" value="-1">
+
+      <div class="teacher-grid">
+        <div class="form-group">
+          <label>🏝️ المرحلة المرتبطة بالسؤال:</label>
+          <select id="inputStage" class="form-control">
+            <option value="0">1. السفينة الغارقة</option>
+            <option value="1">2. الغابة الغامضة</option>
+            <option value="2">3. جسر التماسيح</option>
+            <option value="3">4. كهف الأسرار</option>
+            <option value="4">5. قلعة الكنز</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>✅ الإجابة الصحيحة:</label>
+          <select id="inputCorrect" class="form-control">
+            <option value="0">الاختيار A</option>
+            <option value="1">الاختيار B</option>
+            <option value="2">الاختيار C</option>
+            <option value="3">الاختيار D</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom:10px;">
+        <label>❓ نص السؤال:</label>
+        <input type="text" id="inputQText" class="form-control" placeholder="اكتب السؤال هنا...">
+      </div>
+
+      <div class="teacher-grid">
+        <div class="form-group">
+          <label>الاختيار A:</label>
+          <input type="text" id="inputOpt0" class="form-control" placeholder="الإجابة الأولى A">
+        </div>
+        <div class="form-group">
+          <label>الاختيار B:</label>
+          <input type="text" id="inputOpt1" class="form-control" placeholder="الإجابة الثانية B">
+        </div>
+        <div class="form-group">
+          <label>الاختيار C:</label>
+          <input type="text" id="inputOpt2" class="form-control" placeholder="الإجابة الثالثة C">
+        </div>
+        <div class="form-group">
+          <label>الاختيار D:</label>
+          <input type="text" id="inputOpt3" class="form-control" placeholder="الإجابة الرابعة D">
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
+        <button class="btn-3d btn-green" onclick="saveQuestionForm()">💾 حفظ السؤال</button>
+        <button class="btn-3d btn-gold" onclick="saveSettingsAndApply()">✅ تطبيق الإعدادات وبدء اللعب</button>
+        <button class="btn-3d btn-blue" onclick="restoreDefaultQuestions()">🔄 استعادة أسئلة المنهج الافتراضية</button>
+      </div>
+
+      <!-- Existing Questions List -->
+      <div class="q-list-admin" id="adminQuestionsList">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= VICTORY MODAL ================= -->
+  <div class="modal-overlay" id="victoryModal">
+    <div class="victory-box">
+      <div class="treasure-chest-anim">👑💎🏆</div>
+      <h2 style="font-size:2rem;font-weight:900;color:#78350f;margin-bottom:8px;">مبروووك! لقد هربت من الجزيرة!</h2>
+      <p style="font-size:1.1rem;font-weight:800;color:#b45309;margin-bottom:14px;">
+        لقد فتحت صندوق الكنز الأسطوري وجمعت <span id="finalScoreDisplay">100</span> نقطة بجدارة وشجاعة!
+      </p>
+      <div style="background:#fff;border:3px solid #f59e0b;border-radius:18px;padding:12px;margin-bottom:20px;font-weight:800;color:#15803d;">
+        🌟 بطل المغامرات واللغة العربية 🌟
+      </div>
+      <button class="btn-3d btn-green" style="font-size:1.2rem;padding:14px 32px;width:100%;" onclick="resetGame()">
+        🔄 العب مغامرة جديدة
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. WEB AUDIO SOUND EFFECTS (OFFLINE, NO BACKGROUND MUSIC)
+    // =========================================================================
+    const SFX = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) this.ctx = new AC();
+        }
+      },
+      play(type) {
+        try {
+          this.init();
+          if (!this.ctx) return;
+          if (this.ctx.state === 'suspended') this.ctx.resume();
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          if (type === 'correct') {
+            // Reward chime
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(523.25, now);
+            osc.frequency.setValueAtTime(659.25, now + 0.09);
+            osc.frequency.setValueAtTime(783.99, now + 0.18);
+            osc.frequency.setValueAtTime(1046.5, now + 0.27);
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+            osc.start(now);
+            osc.stop(now + 0.55);
+          } else if (type === 'wrong') {
+            // Gentle try-again boing
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(280, now);
+            osc.frequency.exponentialRampToValueAtTime(160, now + 0.25);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+            osc.start(now);
+            osc.stop(now + 0.3);
+          } else if (type === 'chest') {
+            // Mystery chest shimmer
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(440, now);
+            osc.frequency.exponentialRampToValueAtTime(1180, now + 0.35);
+            gain.gain.setValueAtTime(0.24, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+            osc.start(now);
+            osc.stop(now + 0.5);
+          } else if (type === 'surprise') {
+            // Pirate / Crocodile dramatic alert
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(220, now);
+            osc.frequency.setValueAtTime(290, now + 0.12);
+            osc.frequency.setValueAtTime(200, now + 0.24);
+            gain.gain.setValueAtTime(0.18, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.42);
+            osc.start(now);
+            osc.stop(now + 0.42);
+          } else if (type === 'win') {
+            // Victory fanfare
+            const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5];
+            notes.forEach((freq, i) => {
+              const o = this.ctx.createOscillator();
+              const g = this.ctx.createGain();
+              o.type = 'triangle';
+              o.connect(g);
+              g.connect(this.ctx.destination);
+              o.frequency.setValueAtTime(freq, now + i * 0.12);
+              g.gain.setValueAtTime(0.25, now + i * 0.12);
+              g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.45);
+              o.start(now + i * 0.12);
+              o.stop(now + i * 0.12 + 0.45);
+            });
+          }
+        } catch (e) {}
+      }
+    };
+
+    // =========================================================================
+    // 2. STAGES & ADVENTURE PATHS DATA
+    // =========================================================================
+    const STAGES = [
+      {
+        id: 0,
+        name: "1. السفينة الغارقة",
+        emoji: "🚢",
+        story: "وصلت إلى الشاطئ عند السفينة الغارقة! أجب لتعثر على أول دليل.",
+        coords: { x: 95, y: 240 },
+        paths: [
+          {
+            icon: "📦",
+            name: "فحص صندوق القبطان الخشبي",
+            hint: "قد تجد مكافأة مخبأة!",
+            event: {
+              emoji: "💎",
+              title: "صندوق مفاجآت القبطان!",
+              desc: "رائع! فتحت الصندوق القديم ووجدت جوهرة بحرية لامعة تمنحك +10 نقاط إضافية!",
+              bonus: 10,
+              sound: "chest"
+            }
+          },
+          {
+            icon: "🗺️",
+            name: "تسلق سارية السفينة للمراقبة",
+            hint: "استكشاف الطريق من الأعلى",
+            event: {
+              emoji: "🗺️",
+              title: "خريطة مخفية في الأعلى!",
+              desc: "من أعلى السارية شاهدت ممرًا سريًا يؤدي مباشرة نحو الغابة الغامضة! (+5 نقاط استكشاف)",
+              bonus: 5,
+              sound: "chest"
+            }
+          }
+        ]
+      },
+      {
+        id: 1,
+        name: "2. الغابة الغامضة",
+        emoji: "🌴",
+        story: "الأشجار الكثيفة تحيط بك! اختر إجابتك بحكمة لتشق طريقك.",
+        coords: { x: 170, y: 180 },
+        paths: [
+          {
+            icon: "🦜",
+            name: "اتّباع الببغاء الملون",
+            hint: "طريق سريع بين الأشجار",
+            event: {
+              emoji: "🏴‍☠️",
+              title: "ظهور قرصان الجزيرة!",
+              desc: "توقف! ظهر قرصان أمامك وسألك: (اذكر 3 كلمات عربية تعلمتها اليوم!). بعد أن تجيب شفهيًا للمعلم، يضحك القرصان ويمنحك +10 نقاط!",
+              bonus: 10,
+              sound: "surprise"
+            }
+          },
+          {
+            icon: "🌿",
+            name: "المرور خلف الشلال الصغير",
+            hint: "طريق هادئ ومليء بالأسرار",
+            event: {
+              emoji: "🚪",
+              title: "باب سري خلف الشلال!",
+              desc: "اكتشفت بابًا حجريًا سريًا يختصر عليك المسافة نحو النهر! (+10 نقاط)",
+              bonus: 10,
+              sound: "chest"
+            }
+          },
+          {
+            icon: "🥥",
+            name: "الاستراحة تحت نخلة جوز الهند",
+            hint: "استعادة النشاط",
+            event: {
+              emoji: "🎁",
+              title: "صندوق مفاجآت الملاح!",
+              desc: "وجدت صندوقًا مدفونًا بجانب النخلة بداخله عملات ذهبية تساوي +5 نقاط!",
+              bonus: 5,
+              sound: "chest"
+            }
+          }
+        ]
+      },
+      {
+        id: 2,
+        name: "3. جسر التماسيح",
+        emoji: "🐊",
+        story: "احذر! نهر التماسيح أمامك، وعبور الجسر يحتاج إلى تركيز عالٍ!",
+        coords: { x: 255, y: 155 },
+        paths: [
+          {
+            icon: "🌉",
+            name: "العبور فوق الجسر الخشبي",
+            hint: "تحتاج إلى شجاعة وتوازن",
+            event: {
+              emoji: "🐊",
+              title: "تماسيح النهر تحاصر الجسر!",
+              desc: "تحدٍ إضافي من التماسيح: (كوّن جملة مفيدة باستخدام: هذا أو هذه!). أجب للمعلم لتعبر بسلام وتكسب +10 نقاط!",
+              bonus: 10,
+              sound: "surprise"
+            }
+          },
+          {
+            icon: "🛶",
+            name: "التجديف بالقارب الصغير",
+            hint: "الإبحار بمحاذاة الضفة",
+            event: {
+              emoji: "🪙",
+              title: "كنز في قاع القارب!",
+              desc: "أثناء التجديف لمحت كيسًا من العملات الذهبية تحت المقعد! (+10 نقاط)",
+              bonus: 10,
+              sound: "chest"
+            }
+          }
+        ]
+      },
+      {
+        id: 3,
+        name: "4. كهف الأسرار",
+        emoji: "🦇",
+        story: "وصلت إلى كهف الأسرار المضيء بالكريستال! الكنز أصبح قريبًا جدًا.",
+        coords: { x: 335, y: 120 },
+        paths: [
+          {
+            icon: "🕯️",
+            name: "النفق المضيء بالمشاعل",
+            hint: "ممر مرسوم عليه رموز قديمة",
+            event: {
+              emoji: "📜",
+              title: "خريطة مخفية على الجدار!",
+              desc: "الرموز تكشف كلمة السر لبوابة القلعة! تحدٍ سريع: اقرأ الكلمات بصوت جميل للمعلم واحصل على +10 نقاط!",
+              bonus: 10,
+              sound: "chest"
+            }
+          },
+          {
+            icon: "💎",
+            name: "غرفة الكريستال الأزرق",
+            hint: "غرفة متلألئة في عمق الكهف",
+            event: {
+              emoji: "🎁",
+              title: "صندوق مفاجآت الكريستال!",
+              desc: "وجدت صندوقًا بلوريًا يمنحك دفعة طاقة و +15 نقطة إضافية!",
+              bonus: 15,
+              sound: "chest"
+            }
+          },
+          {
+            icon: "🗝️",
+            name: "الممر الضيق خلف الصخرة",
+            hint: "ممر مختصر نحو القلعة",
+            event: {
+              emoji: "🚪",
+              title: "باب سري يؤدي للقلعة!",
+              desc: "فتحت الباب السري ووصلت مباشرة إلى أسوار قلعة الكنز! (+5 نقاط)",
+              bonus: 5,
+              sound: "surprise"
+            }
+          }
+        ]
+      },
+      {
+        id: 4,
+        name: "5. قلعة الكنز",
+        emoji: "🏰",
+        story: "أنت الآن داخل قلعة الكنز الكبرى! أجب واجمع 100 نقطة لفتح الصندوق!",
+        coords: { x: 395, y: 80 },
+        paths: [
+          {
+            icon: "👑",
+            name: "قاعة العرش الذهبية",
+            hint: "الطريق الملكي نحو الكنز",
+            event: {
+              emoji: "🏆",
+              title: "مكافأة حارس القلعة!",
+              desc: "حارس القلعة معجب بذكائك ويمنحك +10 نقاط إضافية لتقترب من فتح الكنز!",
+              bonus: 10,
+              sound: "chest"
+            }
+          },
+          {
+            icon: "🗝️",
+            name: "غرفة المفاتيح السرية",
+            hint: "البحث عن المفتاح الذهبي",
+            event: {
+              emoji: "🎁",
+              title: "صندوق مفاجآت القلعة!",
+              desc: "عثرت على المفتاح الذهبي مع مكافأة +10 نقاط!",
+              bonus: 10,
+              sound: "chest"
+            }
+          }
+        ]
+      }
+    ];
+
+    // =========================================================================
+    // 3. DEFAULT EDUCATIONAL QUESTIONS (Inspired by الطريق إلى العربية - المستوى الثاني)
+    // =========================================================================
+    const DEFAULT_QUESTIONS = [
+      // Stage 0: السفينة الغارقة (أسماء الإشارة)
+      {
+        stage: 0,
+        q: "اختر اسم الإشارة المناسب للصورة القريبة المذكرة: (....... وَلَدٌ نَشِيطٌ)",
+        options: ["هَذِهِ", "هَذَا", "تِلْكَ", "هَاتَانِ"],
+        correct: 1
+      },
+      {
+        stage: 0,
+        q: "اختر اسم الإشارة المناسب للمفردة المؤنثة البعيدة: (....... شَجَرَةٌ كَبِيرَةٌ)",
+        options: ["ذَلِكَ", "هَذَا", "تِلْكَ", "هَذَانِ"],
+        correct: 2
+      },
+      // Stage 1: الغابة الغامضة (الأفعال والجهات)
+      {
+        stage: 1,
+        q: "أكمل الجملة بالفعل المناسب: (....... الطَّالِبُ الدَّرْسَ فِي الفَصْلِ)",
+        options: ["يَشْرَبُ", "يَنَامُ", "يَقْرَأُ", "يَطْبُخُ"],
+        correct: 2
+      },
+      {
+        stage: 1,
+        q: "أين تطير الطائرة؟ (تَطِيرُ الطَّائِرَةُ ....... المَدِينَةِ)",
+        options: ["تَحْتَ", "فَوْقَ", "دَاخِلَ", "خَلْفَ"],
+        correct: 1
+      },
+      // Stage 2: جسر التماسيح (الأعداد وأجزاء الزمن واللام الشمسية/القمرية)
+      {
+        stage: 2,
+        q: "كَمْ شَهْرًا فِي السَّنَةِ؟",
+        options: ["عَشَرَةُ أَشْهُرٍ", "اثْنَا عَشَرَ شَهْرًا", "سَبْعَةُ أَشْهُرٍ", "ثَلَاثُونَ شَهْرًا"],
+        correct: 1
+      },
+      {
+        stage: 2,
+        q: "أي كلمة من الكلمات التالية تبدأ بـ (اللام القمرية)؟",
+        options: ["الشَّمْسُ", "التِّلْفَازُ", "القَمَرُ", "السَّيَّارَةُ"],
+        correct: 2
+      },
+      // Stage 3: كهف الأسرار (أعضاء الجسم والصفات)
+      {
+        stage: 3,
+        q: "ما ضد صفة (طَوِيلٌ)؟",
+        options: ["كَبِيرٌ", "قَصِيرٌ", "سَرِيعٌ", "نَشِيطٌ"],
+        correct: 1
+      },
+      {
+        stage: 3,
+        q: "اختر الصفة المؤنثة المناسبة: (فَاطِمَةُ بِنْتٌ .......)",
+        options: ["ذَكِيٌّ", "كَرِيمٌ", "نَشِيطَةٌ", "شُجَاعٌ"],
+        correct: 2
+      },
+      // Stage 4: قلعة الكنز (السكن والأسرة والألوان)
+      {
+        stage: 4,
+        q: "أين نطبخ الطعام في البيت؟",
+        options: ["فِي المَطْبَخِ", "فِي الحَدِيقَةِ", "فِي المَوْقِفِ", "فِي الشَّارِعِ"],
+        correct: 0
+      },
+      {
+        stage: 4,
+        q: "اختر اللون المناسب للمؤنث: (هَذِهِ سَيَّارَةٌ .......)",
+        options: ["أَحْمَرُ", "أَزْرَقُ", "حَمْرَاءُ", "أَخْضَرُ"],
+        correct: 2
+      }
+    ];
+
+    // =========================================================================
+    // 4. GAME STATE & INITIALIZATION
+    // =========================================================================
+    let questions = [];
+    let pointsPerQuestion = 10;
+    let goalScore = 100;
+
+    let currentScore = 0;
+    let currentStageIdx = 0;
+    let questionCounter = 1;
+    let currentQuestionObj = null;
+    let usedQuestionIndices = new Set();
+
+    function loadSavedData() {
+      try {
+        const savedQ = localStorage.getItem('treasure_island_questions_v1');
+        const savedPts = localStorage.getItem('treasure_island_pts_v1');
+        const savedGoal = localStorage.getItem('treasure_island_goal_v1');
+
+        questions = savedQ ? JSON.parse(savedQ) : JSON.parse(JSON.stringify(DEFAULT_QUESTIONS));
+        pointsPerQuestion = savedPts ? parseInt(savedPts) : 10;
+        goalScore = savedGoal ? parseInt(savedGoal) : 100;
+      } catch (e) {
+        questions = JSON.parse(JSON.stringify(DEFAULT_QUESTIONS));
+      }
+    }
+
+    function persistData() {
+      try {
+        localStorage.setItem('treasure_island_questions_v1', JSON.stringify(questions));
+        localStorage.setItem('treasure_island_pts_v1', String(pointsPerQuestion));
+        localStorage.setItem('treasure_island_goal_v1', String(goalScore));
+      } catch (e) {}
+    }
+
+    // =========================================================================
+    // 5. CORE GAMEPLAY FLOW
+    // =========================================================================
+    function updateUI() {
+      // Score & Progress
+      document.getElementById('scoreText').textContent = currentScore;
+      document.getElementById('goalText').textContent = goalScore;
+      document.getElementById('pointsPerQDisplay').textContent = pointsPerQuestion;
+
+      const pct = Math.min(100, Math.round((currentScore / goalScore) * 100));
+      document.getElementById('percentText').textContent = pct + '%';
+      document.getElementById('progressFill').style.width = pct + '%';
+
+      // Stage Background & Header
+      document.body.className = `stage-${currentStageIdx + 1}`;
+      const st = STAGES[currentStageIdx];
+      document.getElementById('stageEmoji').textContent = st.emoji;
+      document.getElementById('stageTitle').textContent = `المرحلة ${st.name}`;
+      document.getElementById('stageStory').textContent = st.story;
+      document.getElementById('stageStepBadge').textContent = `المرحلة ${currentStageIdx + 1} من 5`;
+
+      // Update Map Nodes & Explorer Avatar
+      for (let i = 0; i < 5; i++) {
+        const node = document.getElementById(`node-${i}`);
+        const pill = document.getElementById(`pill-${i}`);
+        node.classList.remove('active-node');
+        pill.classList.remove('current', 'completed');
+
+        if (i < currentStageIdx) {
+          pill.classList.add('completed');
+        } else if (i === currentStageIdx) {
+          node.classList.add('active-node');
+          pill.classList.add('current');
+        }
+      }
+
+      const marker = document.getElementById('explorerMarker');
+      marker.setAttribute('transform', `translate(${st.coords.x}, ${st.coords.y})`);
+    }
+
+    function pickQuestionForStage(stageIdx) {
+      // Filter questions matching this stage that haven't been used yet
+      let candidates = questions
+        .map((q, idx) => ({ q, idx }))
+        .filter(item => item.q.stage === stageIdx && !usedQuestionIndices.has(item.idx));
+
+      // Fallback to any unused question
+      if (candidates.length === 0) {
+        candidates = questions
+          .map((q, idx) => ({ q, idx }))
+          .filter(item => !usedQuestionIndices.has(item.idx));
+      }
+
+      // If all questions used, reset used pool
+      if (candidates.length === 0) {
+        usedQuestionIndices.clear();
+        candidates = questions.map((q, idx) => ({ q, idx }));
+      }
+
+      const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+      usedQuestionIndices.add(chosen.idx);
+      return chosen.q;
+    }
+
+    function loadQuestionScreen() {
+      document.getElementById('pathsView').classList.remove('active');
+      document.getElementById('eventView').classList.remove('active');
+      document.getElementById('questionView').style.display = 'block';
+
+      const feedback = document.getElementById('feedbackMsg');
+      feedback.className = 'feedback-msg';
+      feedback.textContent = '';
+
+      currentQuestionObj = pickQuestionForStage(currentStageIdx);
+      document.getElementById('qNumberBadge').textContent = `سؤال المغامرة #${questionCounter}`;
+      document.getElementById('questionText').textContent = currentQuestionObj.q;
+
+      const grid = document.getElementById('optionsGrid');
+      grid.innerHTML = '';
+      const letters = ['A', 'B', 'C', 'D'];
+
+      currentQuestionObj.options.forEach((optText, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'opt-btn';
+        btn.innerHTML = `
+          <span class="opt-letter">${letters[i]}</span>
+          <span>${optText}</span>
+        `;
+        btn.onclick = () => handleOptionSelect(i, btn);
+        grid.appendChild(btn);
+      });
+    }
+
+    function handleOptionSelect(chosenIdx, btnEl) {
+      const feedback = document.getElementById('feedbackMsg');
+
+      if (chosenIdx === currentQuestionObj.correct) {
+        // CORRECT ANSWER
+        SFX.play('correct');
+        btnEl.classList.add('opt-correct');
+
+        // Disable all buttons
+        document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+
+        currentScore += pointsPerQuestion;
+        questionCounter++;
+        updateUI();
+
+        feedback.className = 'feedback-msg show feedback-success';
+        feedback.textContent = `🎉 أحسنت يا بطل! إجابة صحيحة (+${pointsPerQuestion} نقاط)!`;
+
+        // Check if Goal Reached
+        if (currentScore >= goalScore) {
+          setTimeout(triggerVictory, 900);
+          return;
+        }
+
+        // Show Path Choices (Do not advance automatically!)
+        setTimeout(showPathChoices, 1100);
+      } else {
+        // WRONG ANSWER: Do NOT deduct points, give second chance!
+        SFX.play('wrong');
+        btnEl.classList.add('opt-wrong');
+        btnEl.disabled = true; // Disable only the wrong option chosen
+
+        feedback.className = 'feedback-msg show feedback-retry';
+        feedback.textContent = `💪 محاولة شجاعة! لم تُخصم أي نقاط، فكّر جيدًا وجرّب فرصة ثانية!`;
+      }
+    }
+
+    function showPathChoices() {
+      document.getElementById('questionView').style.display = 'none';
+      document.getElementById('eventView').classList.remove('active');
+
+      const pathsView = document.getElementById('pathsView');
+      const pathsGrid = document.getElementById('pathsGrid');
+      pathsGrid.innerHTML = '';
+
+      const stagePaths = STAGES[currentStageIdx].paths;
+      stagePaths.forEach((p) => {
+        const card = document.createElement('div');
+        card.className = 'path-card';
+        card.innerHTML = `
+          <div class="path-icon">${p.icon}</div>
+          <div class="path-name">${p.name}</div>
+          <div class="path-hint">${p.hint}</div>
+        `;
+        card.onclick = () => triggerPathEvent(p.event);
+        pathsGrid.appendChild(card);
+      });
+
+      pathsView.classList.add('active');
+    }
+
+    function triggerPathEvent(ev) {
+      SFX.play(ev.sound || 'chest');
+      document.getElementById('pathsView').classList.remove('active');
+
+      document.getElementById('eventEmoji').textContent = ev.emoji;
+      document.getElementById('eventTitle').textContent = ev.title;
+      document.getElementById('eventDesc').textContent = ev.desc;
+
+      if (ev.bonus && ev.bonus > 0) {
+        currentScore += ev.bonus;
+        updateUI();
+      }
+
+      document.getElementById('eventView').classList.add('active');
+    }
+
+    function continueAfterEvent() {
+      if (currentScore >= goalScore) {
+        triggerVictory();
+        return;
+      }
+
+      // Advance to next stage (cycle through 5 stages if goal > 100)
+      currentStageIdx = (currentStageIdx + 1) % STAGES.length;
+      updateUI();
+      loadQuestionScreen();
+    }
+
+    function quickAddPoints(pts) {
+      SFX.play('correct');
+      currentScore += pts;
+      updateUI();
+      if (currentScore >= goalScore) {
+        triggerVictory();
+      }
+    }
+
+    function triggerVictory() {
+      SFX.play('win');
+      document.getElementById('finalScoreDisplay').textContent = currentScore;
+      document.getElementById('victoryModal').classList.add('open');
+      launchConfetti();
+    }
+
+    function resetGame() {
+      document.getElementById('victoryModal').classList.remove('open');
+      currentScore = 0;
+      currentStageIdx = 0;
+      questionCounter = 1;
+      usedQuestionIndices.clear();
+      updateUI();
+      loadQuestionScreen();
+    }
+
+    // =========================================================================
+    // 6. TEACHER CONTROL PANEL FUNCTIONS
+    // =========================================================================
+    function openTeacherModal() {
+      document.getElementById('inputPointsPerQ').value = pointsPerQuestion;
+      document.getElementById('inputGoalScore').value = goalScore;
+      resetTeacherForm();
+      renderAdminQuestions();
+      document.getElementById('teacherModal').classList.add('open');
+    }
+
+    function closeTeacherModal() {
+      document.getElementById('teacherModal').classList.remove('open');
+    }
+
+    function resetTeacherForm() {
+      document.getElementById('editQuestionIndex').value = '-1';
+      document.getElementById('formModeTitle').textContent = '➕ إضافة سؤال جديد';
+      document.getElementById('inputQText').value = '';
+      document.getElementById('inputOpt0').value = '';
+      document.getElementById('inputOpt1').value = '';
+      document.getElementById('inputOpt2').value = '';
+      document.getElementById('inputOpt3').value = '';
+      document.getElementById('inputCorrect').value = '0';
+      document.getElementById('inputStage').value = String(currentStageIdx);
+    }
+
+    function saveQuestionForm() {
+      const qText = document.getElementById('inputQText').value.trim();
+      const o0 = document.getElementById('inputOpt0').value.trim();
+      const o1 = document.getElementById('inputOpt1').value.trim();
+      const o2 = document.getElementById('inputOpt2').value.trim();
+      const o3 = document.getElementById('inputOpt3').value.trim();
+      const correct = parseInt(document.getElementById('inputCorrect').value);
+      const stage = parseInt(document.getElementById('inputStage').value);
+      const editIdx = parseInt(document.getElementById('editQuestionIndex').value);
+
+      if (!qText || !o0 || !o1 || !o2 || !o3) {
+        return;
+      }
+
+      const newObj = {
+        stage,
+        q: qText,
+        options: [o0, o1, o2, o3],
+        correct
+      };
+
+      if (editIdx >= 0 && editIdx < questions.length) {
+        questions[editIdx] = newObj;
+      } else {
+        questions.unshift(newObj);
+      }
+
+      persistData();
+      resetTeacherForm();
+      renderAdminQuestions();
+    }
+
+    function editAdminQuestion(idx) {
+      const item = questions[idx];
+      if (!item) return;
+
+      document.getElementById('editQuestionIndex').value = String(idx);
+      document.getElementById('formModeTitle').textContent = `✏️ تعديل السؤال رقم #${idx + 1}`;
+      document.getElementById('inputStage').value = String(item.stage);
+      document.getElementById('inputQText').value = item.q;
+      document.getElementById('inputOpt0').value = item.options[0];
+      document.getElementById('inputOpt1').value = item.options[1];
+      document.getElementById('inputOpt2').value = item.options[2];
+      document.getElementById('inputOpt3').value = item.options[3];
+      document.getElementById('inputCorrect').value = String(item.correct);
+    }
+
+    function deleteAdminQuestion(idx) {
+      if (questions.length <= 1) return;
+      questions.splice(idx, 1);
+      persistData();
+      renderAdminQuestions();
+    }
+
+    function restoreDefaultQuestions() {
+      questions = JSON.parse(JSON.stringify(DEFAULT_QUESTIONS));
+      pointsPerQuestion = 10;
+      goalScore = 100;
+      document.getElementById('inputPointsPerQ').value = 10;
+      document.getElementById('inputGoalScore').value = 100;
+      persistData();
+      renderAdminQuestions();
+    }
+
+    function saveSettingsAndApply() {
+      const pts = parseInt(document.getElementById('inputPointsPerQ').value);
+      const goal = parseInt(document.getElementById('inputGoalScore').value);
+      if (pts > 0) pointsPerQuestion = pts;
+      if (goal >= 10) goalScore = goal;
+
+      persistData();
+      closeTeacherModal();
+      resetGame();
+    }
+
+    function renderAdminQuestions() {
+      const list = document.getElementById('adminQuestionsList');
+      list.innerHTML = '';
+      const letters = ['A', 'B', 'C', 'D'];
+
+      questions.forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.className = 'q-item-row';
+        row.innerHTML = `
+          <div class="q-item-info">
+            <div class="q-item-stage">المرحلة: ${STAGES[item.stage]?.name || 'عام'} | الإجابة: ${letters[item.correct]} (${item.options[item.correct]})</div>
+            <div>${idx + 1}. ${item.q}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button class="btn-3d btn-blue" style="padding:6px 10px;font-size:0.8rem;" onclick="editAdminQuestion(${idx})">تعديل</button>
+            <button class="btn-3d btn-red" style="padding:6px 10px;font-size:0.8rem;" onclick="deleteAdminQuestion(${idx})">حذف</button>
+          </div>
+        `;
+        list.appendChild(row);
+      });
+    }
+
+    // =========================================================================
+    // 7. BUILT-IN OFFLINE CONFETTI ENGINE
+    // =========================================================================
+    function launchConfetti() {
+      const canvas = document.getElementById('confettiCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const colors = ['#fbbf24', '#22c55e', '#38bdf8', '#f43f5e', '#a855f7'];
+      const pieces = Array.from({ length: 130 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height - canvas.height,
+        w: Math.random() * 10 + 6,
+        h: Math.random() * 6 + 4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        vy: Math.random() * 4 + 2,
+        vx: Math.random() * 2 - 1,
+        rot: Math.random() * 360
+      }));
+
+      let frames = 0;
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        pieces.forEach(p => {
+          p.y += p.vy;
+          p.x += p.vx;
+          p.rot += 4;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rot * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        });
+        frames++;
+        if (frames < 180) {
+          requestAnimationFrame(animate);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      animate();
+    }
+
+    // Boot Game
+    window.onload = function () {
+      loadSavedData();
+      updateUI();
+      loadQuestionScreen();
+    };
+  </script>
+</body>
+</html>
